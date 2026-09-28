@@ -68,6 +68,11 @@ uint8_t  AIRCOPY_CurrentSliceMap(void);   // map index of the block in progress 
 // XOR-obfuscate `count` words of g_FSK_Buffer starting at index 1.
 // Self-inverse: applying twice restores the original buffer.
 void AIRCOPY_Obfuscate(unsigned int count);
+// Shared FSK transmit tail: SetTxParameters + SendFSKData + PA off.
+// AirCopy's 50 ms pre-delay stays in AIRCOPY_TransmitBuffer; BEAM calls
+// this directly with no delay. Order and calls are byte-identical to the
+// previously duplicated sequences.
+void AIRCOPY_TransmitBufferNow(void);
 
 #endif // ENABLE_AIRCOPY
 #endif // APP_AIRCOPY_H

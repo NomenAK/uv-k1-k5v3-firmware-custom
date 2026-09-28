@@ -140,10 +140,8 @@ static void BEAM_SendPacket(void)
     UI_DisplayMain();
     ST7565_BlitFullScreen();
 
-    RADIO_SetTxParameters();
-    BK4819_SendFSKData(g_FSK_Buffer);
-    BK4819_SetupPowerAmplifier(0, 0);
-    BK4819_ToggleGpioOut(BK4819_GPIO1_PIN29_PA_ENABLE, false);
+    // Shared tail with AirCopy (no 50 ms delay on the BEAM path).
+    AIRCOPY_TransmitBufferNow();
 
     RADIO_SelectVfos();
     RADIO_SetupRegisters(true);

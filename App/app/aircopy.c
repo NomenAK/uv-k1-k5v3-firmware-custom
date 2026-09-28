@@ -153,6 +153,11 @@ static void AIRCOPY_TransmitBuffer(void)
 {
     // Both sides need time to leave TX and re-arm FSK RX before the reply.
     SYSTEM_DelayMs(50);
+    AIRCOPY_TransmitBufferNow();
+}
+
+void AIRCOPY_TransmitBufferNow(void)
+{
     RADIO_SetTxParameters();
     BK4819_SendFSKData(g_FSK_Buffer);
     BK4819_SetupPowerAmplifier(0, 0);
