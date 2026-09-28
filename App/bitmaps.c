@@ -35,11 +35,6 @@ const uint8_t gFontF[9] =
     0b00111110
 };
 
-const uint8_t gFontS[6] =
-{
-    0x26, 0x49, 0x49, 0x49, 0x49, 0x32 // 'S'
-};
-
 const uint8_t gFontKeyLock[9] =
 {
     0x7c, 0x46, 0x45, 0x45, 0x45, 0x45, 0x45, 0x46, 0x7c
@@ -231,18 +226,6 @@ const uint8_t BITMAP_VFO_NotDefault[7] =
     0b00001000,
     0b00000000
 };
-
-const uint8_t BITMAP_VFO_Empty[7] =
-{
-    0b00000000,
-    0b00000000,
-    0b00000000,
-    0b00000000,
-    0b00000000,
-    0b00000000,
-    0b00000000
-};
-
 const uint8_t BITMAP_compand[6] =
 {
     0b00000000,

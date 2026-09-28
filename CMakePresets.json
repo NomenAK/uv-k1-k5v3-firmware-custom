@@ -193,6 +193,7 @@
             "name": "Max",
             "inherits": "Fusion",
             "cacheVariables": {
+                "ENABLE_SMALL_BOLD": false,
                 "ENABLE_FEAT_F4HWN_RESCUE_OPS": true,
                 "ENABLE_FEAT_F4HWN_FOXHUNT": true,
                 "ENABLE_FEAT_F4HWN_BEACON": true,

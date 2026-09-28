@@ -1025,8 +1025,8 @@ void DisplayRSSIBar(const bool now)
             for(uint8_t i = 0; i < sizeof(BITMAP_VFO_Default); i++)
                 p_line0[i] = (p_line0[i] & 0x80) | BITMAP_VFO_Default[i];
         } else {
-            for(uint8_t i = 0; i < sizeof(BITMAP_VFO_Empty); i++)
-                p_line0[i] = (p_line0[i] & 0x80) | BITMAP_VFO_Empty[i];
+            for(uint8_t i = 0; i < sizeof(BITMAP_VFO_Default); i++)
+                p_line0[i] &= 0x80;
         }
 
         ST7565_DrawLine(0, RxLine + 1, p_line0, sizeof(BITMAP_VFO_Default));

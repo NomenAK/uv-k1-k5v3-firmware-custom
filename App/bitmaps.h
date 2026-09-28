@@ -3,12 +3,12 @@
 #define BITMAP_H
 
 #include <stdint.h>
-
+#include "font.h"
 extern const uint8_t gFontPowerSave[2][6];
 extern const uint8_t gFontPttOnePush[2][6];
 extern const uint8_t gFontPttClassic[2][6];
 extern const uint8_t gFontF[9];
-extern const uint8_t gFontS[6];
+#define gFontS (gFontSmall['S' - ' ' - 1])
 
 extern const uint8_t gFontKeyLock[9];
 extern const uint8_t gFontLight[9];
@@ -38,7 +38,6 @@ extern const uint8_t BITMAP_NotReady[7];
 
 extern const uint8_t BITMAP_VFO_Default[7];
 extern const uint8_t BITMAP_VFO_NotDefault[7];
-extern const uint8_t BITMAP_VFO_Empty[7];
 extern const uint8_t BITMAP_VFO_Lock[7];
 extern const uint8_t BITMAP_PowerUser[3];
 extern const uint8_t BITMAP_compand[6];
