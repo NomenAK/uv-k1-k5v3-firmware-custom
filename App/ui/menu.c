@@ -1030,7 +1030,11 @@ void UI_DisplayMenu(void)
         case MENU_OFFSET:
             if (!gIsInSubMenu || gInputBoxIndex == 0)
             {
-                sprintf(String, "%3d.%05u", gSubMenuSelection / 100000, abs(gSubMenuSelection) % 100000);
+                // Unsigned division: TX_OFFSET_FREQUENCY is uint32_t, so the
+                // selection is always >= 0 here; keep exact rendering via
+                // explicit magnitude to avoid pulling __aeabi_idiv.
+                const uint32_t offset_mag = (uint32_t)gSubMenuSelection;
+                sprintf(String, "%3u.%05u", (unsigned)(offset_mag / 100000u), (unsigned)(offset_mag % 100000u));
             }
             else
             {
@@ -1075,7 +1079,8 @@ void UI_DisplayMenu(void)
             }
             else if(gSubMenuSelection < 61)
             {
-                sprintf(String, "%02dm:%02ds", (((gSubMenuSelection) * 5) / 60), (((gSubMenuSelection) * 5) % 60));
+                const unsigned abr_secs = (unsigned)gSubMenuSelection * 5u;
+                sprintf(String, "%02um:%02us", abr_secs / 60u, abr_secs % 60u);
                 //#if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
                 //ST7565_Gauge(4, 1, 60, gSubMenuSelection);
                 gaugeLine = 4;
@@ -1112,7 +1117,8 @@ void UI_DisplayMenu(void)
                 strcpy(String, gSubMenu_OFF_ON[0]);
             else
             {
-                sprintf(String, "%02dm:%02ds", ((gSubMenuSelection * 15) / 60), ((gSubMenuSelection * 15) % 60));
+                const unsigned autolk_secs = (unsigned)gSubMenuSelection * 15u;
+                sprintf(String, "%02um:%02us", autolk_secs / 60u, autolk_secs % 60u);
                 //#if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
                 //ST7565_Gauge(4, 1, 40, gSubMenuSelection);
                 gaugeLine = 4;
@@ -1260,8 +1266,9 @@ void UI_DisplayMenu(void)
             strcpy(String, gSubMenu_RXMode[gSubMenuSelection]);
             break;
 
-        case MENU_TOT:
-            sprintf(String, "%02dm:%02ds", (((gSubMenuSelection + 1) * 5) / 60), (((gSubMenuSelection + 1) * 5) % 60));
+        case MENU_TOT: {
+            const unsigned tot_secs = ((unsigned)gSubMenuSelection + 1u) * 5u;
+            sprintf(String, "%02um:%02us", tot_secs / 60u, tot_secs % 60u);
             //#if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
             //ST7565_Gauge(4, 5, 179, gSubMenuSelection);
             gaugeLine = 4;
@@ -1269,7 +1276,7 @@ void UI_DisplayMenu(void)
             gaugeMax = 179;
             //#endif
             break;
-
+        }
         #ifdef ENABLE_VOICE
             case MENU_VOICE:
                 strcpy(String, gSubMenu_VOICE[gSubMenuSelection]);
@@ -1283,7 +1290,8 @@ void UI_DisplayMenu(void)
             }
             else if(gSubMenuSelection < 81)
             {
-                sprintf(String, "CARRIER\n%02ds:%03dms", ((gSubMenuSelection * 250) / 1000), ((gSubMenuSelection * 250) % 1000));
+                const unsigned carrier_ms = (unsigned)gSubMenuSelection * 250u;
+                sprintf(String, "CARRIER\n%02us:%03ums", carrier_ms / 1000u, carrier_ms % 1000u);
                 //#if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
                 //ST7565_Gauge(5, 1, 80, gSubMenuSelection);
                 gaugeLine = 5;
@@ -1293,7 +1301,8 @@ void UI_DisplayMenu(void)
             }
             else
             {
-                sprintf(String, "TIMEOUT\n%02dm:%02ds", (((gSubMenuSelection - 80) * 5) / 60), (((gSubMenuSelection - 80) * 5) % 60));
+                const unsigned sc_timeout_secs = ((unsigned)gSubMenuSelection - 80u) * 5u;
+                sprintf(String, "TIMEOUT\n%02um:%02us", sc_timeout_secs / 60u, sc_timeout_secs % 60u);
                 //#if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
                 //ST7565_Gauge(5, 80, 104, gSubMenuSelection);
                 gaugeLine = 5;
@@ -1592,7 +1601,8 @@ void UI_DisplayMenu(void)
             }
             else if(gSubMenuSelection < 121)
             {
-                sprintf(String, "%dh:%02dm", (gSubMenuSelection / 60), (gSubMenuSelection % 60));
+                const unsigned sleep_mins = (unsigned)gSubMenuSelection;
+                sprintf(String, "%uh:%02um", sleep_mins / 60u, sleep_mins % 60u);
                 //#if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)
                 //ST7565_Gauge(4, 1, 120, gSubMenuSelection);
                 gaugeLine = 4;

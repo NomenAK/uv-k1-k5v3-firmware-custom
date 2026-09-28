@@ -245,9 +245,10 @@ static void RXTX_LOG_UpdateSessionMeters(void)
     const int16_t rssiDbm =
         BK4819_GetRSSI_dBm()
         + dBmCorrTable[gRxVfo->Band];
+    // Numerator is 0..53 here, unsigned avoids __aeabi_idiv.
     const uint8_t sMeter = rssiDbm >= -93
         ? (uint8_t)(9u + MIN((uint8_t)(rssiDbm + 93), 40u))
-        : (rssiDbm < -141 ? 0 : (uint8_t)((rssiDbm + 147) / 6));
+        : (rssiDbm < -141 ? 0 : (uint8_t)(((unsigned)(rssiDbm + 147)) / 6u));
 
     if (gSessionSMeter == RXTX_LOG_SMETER_UNKNOWN || sMeter > gSessionSMeter)
         gSessionSMeter = sMeter;

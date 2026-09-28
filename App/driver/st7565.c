@@ -309,7 +309,12 @@ const uint8_t cmds[] = {
     #endif
 
     int16_t map(int16_t x, int16_t in_min, int16_t in_max, int16_t out_min, int16_t out_max) {
-        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+        // Unsigned math: gauge ranges are non-negative; avoids __aeabi_idiv.
+        // Callers (ST7565_Gauge) pass uint8_t values widened to int16_t,
+        // so all operands are >= 0 here.
+        const unsigned num = (unsigned)(x - in_min) * (unsigned)(out_max - out_min);
+        const unsigned den = (unsigned)(in_max - in_min);
+        return (int16_t)(num / den + (unsigned)out_min);
     }
 
     //#if !defined(ENABLE_SPECTRUM) || !defined(ENABLE_FMRADIO)

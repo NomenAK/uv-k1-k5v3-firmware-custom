@@ -707,10 +707,12 @@ void ACTION_MainOnly(void)
 #ifdef ENABLE_FEAT_F4HWN_AUDIO
 void ACTION_RxA(void)
 {
-    if(gRxVfo->Modulation == MODULATION_AM)
-        gSetting_set_audio_am = (gSetting_set_audio_am + 1) % 3;
-    else if (gRxVfo->Modulation == MODULATION_FM)
-        gSetting_set_audio_fm = (gSetting_set_audio_fm + 1) % 5;
+    if(gRxVfo->Modulation == MODULATION_AM) {
+        if (++gSetting_set_audio_am >= 3u) gSetting_set_audio_am = 0u;
+    }
+    else if (gRxVfo->Modulation == MODULATION_FM) {
+        if (++gSetting_set_audio_fm >= 5u) gSetting_set_audio_fm = 0u;
+    }
 
     RADIO_SetModulation(gRxVfo->Modulation);
 }

@@ -255,8 +255,8 @@ static void SaveSettings()
     // Data[1]: manualSetFlag (0), autoSensitivity (2:1)
     Data[1] = (manualSetFlag & 0x01) | ((autoSensitivity & 0x03) << 1);
 
-    // Data[2]: dbMax encoded as (dbMax + 130) / 5
-    Data[2] = (uint8_t)((settings.dbMax + 130) / 5);
+    // Data[2]: dbMax encoded as (dbMax + 130) / 5; numerator is 0..60.
+    Data[2] = (uint8_t)(((unsigned)(settings.dbMax + 130)) / 5u);
 
     // Data[3]: rssiTriggerLevel as uint8_t (0xFF = auto)
     Data[3] = (settings.rssiTriggerLevel == RSSI_MAX_VALUE) ? 0xFF : (uint8_t)settings.rssiTriggerLevel;
@@ -1306,22 +1306,25 @@ static bool IsRssiHistoryInvalid(uint16_t rssi)
 // occupy more of the display height while strong peaks are not clipped.
 uint8_t Rssi2PX(uint16_t rssi, uint8_t pxMin, uint8_t pxMax)
 {
-    const int DB_MIN = settings.dbMin << 1;
-    const int DB_MAX = settings.dbMax << 1;
-    const int DB_RANGE = DB_MAX - DB_MIN;
+    // Unsigned arithmetic: dBm values are negative, so shift into a
+    // non-negative domain first to avoid pulling __aeabi_idiv.
+    const unsigned DB_MIN = (unsigned)((int)settings.dbMin << 1);
+    const unsigned DB_MAX = (unsigned)((int)settings.dbMax << 1);
+    const unsigned DB_RANGE = DB_MAX - DB_MIN;
 
-    const uint8_t PX_RANGE = pxMax - pxMin;
+    const unsigned PX_RANGE = (unsigned)pxMax - (unsigned)pxMin;
 
-    int dbm = clamp(Rssi2DBm(rssi) << 1, DB_MIN, DB_MAX);
+    const int dbm_raw = clamp(Rssi2DBm(rssi) << 1, (int)DB_MIN, (int)DB_MAX);
+    const unsigned dbm_off = (unsigned)(dbm_raw - (int)DB_MIN);
 
     // Linear 0..PX_RANGE position
-    uint8_t linear = (uint8_t)(((dbm - DB_MIN) * PX_RANGE + DB_RANGE / 2) / DB_RANGE);
+    uint8_t linear = (uint8_t)((dbm_off * PX_RANGE + DB_RANGE / 2u) / DB_RANGE);
 
     // Square-root compression: sqrt(linear * PX_RANGE) rescaled to PX_RANGE
     uint8_t compressed = iSqrt((uint16_t)linear * PX_RANGE);
 
     // Blend 50/50 between linear and compressed for a subtle effect
-    return ((uint16_t)linear + compressed) / 2 + pxMin;
+    return (uint8_t)(((unsigned)linear + (unsigned)compressed) / 2u) + pxMin;
 }
 
 uint8_t Rssi2Y(uint16_t rssi)

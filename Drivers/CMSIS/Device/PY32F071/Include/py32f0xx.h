@@ -224,7 +224,7 @@ typedef enum
 
 #define MODIFY_REG(REG, CLEARMASK, SETMASK)  WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
 
-#define POSITION_VAL(VAL)     (__CLZ(__RBIT(VAL)))
+#define POSITION_VAL(VAL)     ((uint32_t)__builtin_ctz(VAL))
 
 /* Use of interrupt control for register exclusive access */
 /* Atomic 32-bit register access macro to set one or several bits */

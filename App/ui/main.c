@@ -847,7 +847,7 @@ void UI_DisplayAudioBar(void)
 #endif
 
 #if defined(ENABLE_FEAT_F4HWN_AUDIO_SCOPE) || defined(ENABLE_FEAT_F4HWN_OVERLAY_APPS)
-#define SCOPE_SAMPLES        43   // number of columns (43 × 3px = 128px wide)
+#define SCOPE_SAMPLES        43u  // number of columns (43 × 3px = 128px wide)
 #define SCOPE_NOISE_GATE     50u  // minimum range below which the display shows baseline
 #define SCOPE_FLOOR_RISE     2u   // floor rise per frame (+100 units/s at 20ms/frame)
 #define SCOPE_FLOOR_DROP_SHR 3u   // floor drop IIR shift: drop by (floor-min) >> N per frame (~160ms to halve)
@@ -892,7 +892,8 @@ void UI_DisplayAudioScopeOverlay(const uint8_t line, const bool active)
     if (g_scope_buf[g_scope_write] == 0) 
         g_scope_buf[g_scope_write] =  SCOPE_VOLUME_MIN;
 
-    g_scope_write = (g_scope_write + 1u) % SCOPE_SAMPLES;
+    if (++g_scope_write >= SCOPE_SAMPLES)
+        g_scope_write = 0u;
 
     uint8_t *p_line = gFrameBuffer[line];
     memset(p_line, 0, LCD_WIDTH);
@@ -915,8 +916,8 @@ void UI_DisplayAudioScopeOverlay(const uint8_t line, const bool active)
 
     const uint16_t range = (max_val > g_scope_floor) ? (max_val - g_scope_floor) : 0u;
 
+    uint8_t idx = g_scope_write;
     for (uint8_t i = 0u; i < SCOPE_SAMPLES; i++) {
-        const uint8_t  idx    = (g_scope_write + i) % SCOPE_SAMPLES;
         uint8_t        height = 0u;
         if (range >= SCOPE_NOISE_GATE) {
             const uint16_t v = (g_scope_buf[idx] > g_scope_floor) ? (g_scope_buf[idx] - g_scope_floor) : 0u;
@@ -931,6 +932,8 @@ void UI_DisplayAudioScopeOverlay(const uint8_t line, const bool active)
         p_col[0] = mask;
         p_col[1] = mask;
 
+        if (++idx >= SCOPE_SAMPLES)
+            idx = 0u;
     }
 
 }
@@ -1100,13 +1103,14 @@ void DisplayRSSIBar(const bool now)
         s_level = 9;
     else if (rssi_dBm < -141)
         s_level = 0;
-    else 
-        s_level = (rssi_dBm + 147) / 6;
+    else
+        // Unsigned: numerator is 0..53 here, avoids __aeabi_idiv.
+        s_level = (uint8_t)(((unsigned)(rssi_dBm + 147)) / 6u);
 
     if (s_level == 9) {
         // Compute over-S9 dB directly
         overS9dBm  = (uint8_t)MIN(rssi_dBm - (-93), 40);
-        overS9Bars = overS9dBm / 10;
+        overS9Bars = (uint8_t)(overS9dBm / 10u);
     }
     const int16_t display_rssi_dBm = (rssi_dBm > -53) ? -53 : rssi_dBm;
 #else
@@ -2149,7 +2153,9 @@ void UI_DisplayMain(void)
 
         if (vfoInfo->freq_config_RX.Frequency != vfoInfo->freq_config_TX.Frequency)
         {   // show the TX offset symbol
-            int i = vfoInfo->TX_OFFSET_FREQUENCY_DIRECTION % 3;
+            // TX_OFFSET_FREQUENCY_DIRECTION is 0..2 (0..3 with RESCUE_OPS): use
+            // unsigned modulo so no signed __aeabi_idiv is linked.
+            unsigned dir_idx = (unsigned)vfoInfo->TX_OFFSET_FREQUENCY_DIRECTION % 3u;
 
             #ifdef ENABLE_FEAT_F4HWN_RESCUE_OPS
                 const char dir_list[][2] = {"", "+", "-", "D"};
@@ -2160,7 +2166,7 @@ void UI_DisplayMain(void)
                    gTxVfo->pTX == &gTxVfo->freq_config_RX &&
                    !vfoInfo->FrequencyReverse)
                 {
-                    i = 3;
+                    dir_idx = 3u;
                 }
             #else
                 const char dir_list[][2] = {"", "+", "-"};
@@ -2169,23 +2175,23 @@ void UI_DisplayMain(void)
 #if ENABLE_FEAT_F4HWN
         if (gSetting_set_gui)
         {
-            UI_PrintStringSmallNormal(dir_list[i], LCD_WIDTH + 60, 0, line + 1);
+            UI_PrintStringSmallNormal(dir_list[dir_idx], LCD_WIDTH + 60, 0, line + 1);
         }
         else
         {
             #ifdef ENABLE_FEAT_F4HWN_RESCUE_OPS
-            if(i == 3)
-                GUI_DisplaySmallest(dir_list[i], 43, line == 0 ? 17 : 49, false, true);
+            if(dir_idx == 3u)
+                GUI_DisplaySmallest(dir_list[dir_idx], 43, line == 0 ? 17 : 49, false, true);
             else
             {
             #endif
-            UI_PrintStringSmallNormal(dir_list[i], LCD_WIDTH + 41, 0, line + 1);
+            UI_PrintStringSmallNormal(dir_list[dir_idx], LCD_WIDTH + 41, 0, line + 1);
             #ifdef ENABLE_FEAT_F4HWN_RESCUE_OPS
             }
             #endif
         }
 #else
-            UI_PrintStringSmallNormal(dir_list[i], LCD_WIDTH + 54, 0, line + 1);
+            UI_PrintStringSmallNormal(dir_list[dir_idx], LCD_WIDTH + 54, 0, line + 1);
 #endif
         }
 

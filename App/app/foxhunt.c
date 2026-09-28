@@ -298,12 +298,14 @@ static void FOXHUNT_Blip(uint16_t freq)
 // S1..S9 are 6 dB apart, the four marks past S9 (+10..+40) are 10 dB apart.
 static uint8_t FOXHUNT_FillCount(int16_t dbm)
 {
-    int16_t n;
+    unsigned n;
     if (dbm < -141) return 0;
     if (dbm <= -93)
-        n = 1 + (dbm + 141) / 6;    // S1 (-141) .. S9 (-93)  -> 1..9
+        // Numerator is 0..48 here, unsigned avoids __aeabi_idiv.
+        n = 1u + ((unsigned)(dbm + 141)) / 6u;    // S1 (-141) .. S9 (-93)  -> 1..9
     else
-        n = 9 + (dbm + 93) / 10;    // +10 (-83) .. +40 (-53) -> 10..13
+        // Numerator is 0..40 here, unsigned avoids __aeabi_idiv.
+        n = 9u + ((unsigned)(dbm + 93)) / 10u;    // +10 (-83) .. +40 (-53) -> 10..13
     if (n > FOXHUNT_SEG_COUNT)
         n = FOXHUNT_SEG_COUNT;
     return (uint8_t)n;
@@ -319,7 +321,7 @@ static void FOXHUNT_BuildS(char *out, int16_t dbm)
     } else if (dbm < -141) {
         sprintf(out, "S0");
     } else {
-        sprintf(out, "S%d", (dbm + 147) / 6);
+        sprintf(out, "S%d", (unsigned)(dbm + 147) / 6u);
     }
 }
 

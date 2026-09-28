@@ -68,7 +68,8 @@ int rand_custom(void) {
 
 // Return integer from min to max include
 int randInt(int min, int max) {
-    return min + (rand_custom() % (max - min + 1));
+    // Unsigned modulo: rand_custom() is always >= 0, avoid __aeabi_idiv.
+    return min + (int)((unsigned)rand_custom() % (unsigned)(max - min + 1));
 }
 
 // Reset

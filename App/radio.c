@@ -144,10 +144,12 @@ void RADIO_NextValidList(int8_t direction)
     do {
         if (direction > 0) {
             // Forward: 1 → 2 → ... → 25 → 1
-            gEeprom.SCAN_LIST_DEFAULT = (gEeprom.SCAN_LIST_DEFAULT % MAX_VALUE) + 1;
+            if (++gEeprom.SCAN_LIST_DEFAULT > MAX_VALUE)
+                gEeprom.SCAN_LIST_DEFAULT = 1u;
         } else {
             // Backward: 25 → 24 → ... → 1 → 25
-            gEeprom.SCAN_LIST_DEFAULT = ((gEeprom.SCAN_LIST_DEFAULT - 2 + MAX_VALUE) % MAX_VALUE) + 1;
+            if (--gEeprom.SCAN_LIST_DEFAULT < 1u)
+                gEeprom.SCAN_LIST_DEFAULT = MAX_VALUE;
         }
         attempts++;
         
